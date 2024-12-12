@@ -8,9 +8,9 @@ public class CircleCoordinates {
         double centerLat = 50.458018;
         double centerLon = 30.505421;
         double radius = 0.0004;
-        int numPoints = 6;
+        int numPoints = 16;
 
-        for (int i = 0; i < 6; i++) {
+        for (int i = 0; i < 9; i++) {
             centerLon = centerLon + radius * 3;
 
             List<Double> latitudes = new ArrayList<>();
@@ -21,11 +21,11 @@ public class CircleCoordinates {
 
             for (int k = 0; k < numPoints; k++) {
                 double angle = 2 * Math.PI * k / numPoints;
-                double lat = round(centerLat + radius * Math.cos(angle), 10);
-                double lon = round(centerLon + radius * Math.sin(angle), 10);
+                double lat = round(centerLat + radius * Math.cos(angle), 14);
+                double lon = round(centerLon + radius * Math.sin(angle), 14);
 
-                int temperature = (int) Math.round(Math.random() * 100);
-                double batteryLevel = round(Math.random() * 100, 2);
+                int temperature = (int) Math.round(Math.random() * 100) + 10;
+                double batteryLevel = round(Math.random() * 100, 2) + 10;
 
                 latitudes.add(lat);
                 longitudes.add(lon);
@@ -36,10 +36,10 @@ public class CircleCoordinates {
 
             System.out.println("Counter:");
             System.out.println(i + 1);
-            System.out.println("Latitude array:");
-            System.out.println(latitudes);
-            System.out.println("Longitude array:");
-            System.out.println(longitudes);
+//            System.out.println("Latitude array:");
+//            System.out.println(latitudes);
+//            System.out.println("Longitude array:");
+//            System.out.println(longitudes);
 
             System.out.println("Temperature array:");
             System.out.println(temps);
