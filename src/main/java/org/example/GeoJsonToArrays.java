@@ -24,22 +24,25 @@ public class GeoJsonToArrays {
 
     public static void parseGeoJson(String filePath) throws IOException {
         // Initialize the ObjectMapper for parsing JSON
-        List<JsonNode> coordinatesNode = getJsonNode(filePath);
+        List<JsonNode> tripsNode = getJsonNode(filePath);
 
         // Lists to store latitudes and longitudes
-        List<Double> latitudes = new ArrayList<>();
-        List<Double> longitudes = new ArrayList<>();
+
 
         // Extract the latitude and longitude values
-        for (JsonNode coordinate : coordinatesNode) {
-            if (coordinate.isArray() && coordinate.size() >= 2) {
-                longitudes.add(Utility.round(coordinate.get(0).asDouble(), 14)); // Longitude comes first in GeoJSON
-                latitudes.add(Utility.round(coordinate.get(1).asDouble(), 14)); // Latitude comes second
+        for (JsonNode trip : tripsNode) {
+            List<Double> latitudes = new ArrayList<>();
+            List<Double> longitudes = new ArrayList<>();
+            for (JsonNode coordinate : trip) {
+                if (coordinate.isArray() && coordinate.size() >= 2) {
+                    longitudes.add(Utility.round(coordinate.get(0).asDouble(), 14)); // Longitude comes first in GeoJSON
+                    latitudes.add(Utility.round(coordinate.get(1).asDouble(), 14)); // Latitude comes second
+                }
             }
+            System.out.println("Longitudes: \n" + longitudes);
+            System.out.println("Latitudes: \n" + latitudes);
+            System.out.println();
         }
-        System.out.println("Longitudes: \n" + longitudes);
-        System.out.println("Latitudes: \n" + latitudes);
-
     }
 
     private static List<JsonNode> getJsonNode(String filePath) throws IOException {
