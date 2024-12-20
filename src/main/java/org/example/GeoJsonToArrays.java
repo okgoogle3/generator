@@ -23,13 +23,17 @@ public class GeoJsonToArrays {
 
 
     public static void parseGeoJson(String filePath) throws IOException {
-        List<JsonNode> tripsNode = getJsonNode(filePath);
+        List<JsonNode> geometryNode = getJsonNode(filePath);
         short count = 1;
 
-        for (JsonNode trip : tripsNode) {
+        for (JsonNode geometry : geometryNode) {
             List<Double> latitudes = new ArrayList<>();
             List<Double> longitudes = new ArrayList<>();
-            for (JsonNode coordinate : trip) {
+            if (geometry.get("type").asText().equals("Point")) {
+                longitudes.add(Utility.round(geometry.get("coordinates").get(0).asDouble(), 14)); // Longitude comes first in GeoJSON
+                latitudes.add(Utility.round(geometry.get("coordinates").get(1).asDouble(), 14)); // Latitude comes second
+            }
+            for (JsonNode coordinate : geometry.get("coordinates")) {
                 if (coordinate.isArray() && coordinate.size() >= 2) {
                     longitudes.add(Utility.round(coordinate.get(0).asDouble(), 14)); // Longitude comes first in GeoJSON
                     latitudes.add(Utility.round(coordinate.get(1).asDouble(), 14)); // Latitude comes second
@@ -48,7 +52,7 @@ public class GeoJsonToArrays {
         ArrayNode arrayNode = (ArrayNode) rootNode.at("/features");
         List<JsonNode> result = new ArrayList<>();
         for (JsonNode jsonNode : arrayNode) {
-            result.add(jsonNode.at("/geometry/coordinates"));
+            result.add(jsonNode.at("/geometry"));
         }
         return result;
     }
