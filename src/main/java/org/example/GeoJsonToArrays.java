@@ -8,12 +8,11 @@ import org.example.util.Utility;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 public class GeoJsonToArrays {
     public static void main(String[] args) {
-        String filePath = "/home/thingsboard/Desktop/generator/src/main/resources/geojson7.txt";
+        String filePath = "/home/thingsboard/Desktop/generator/src/main/resources/test.txt";
 
         try {
             parseGeoJson(filePath);

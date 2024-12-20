@@ -13,7 +13,7 @@ public class Utility {
     }
 
     public static double generateDoubleInRange(int min, int max) {
-        return (Math.random() - min) / (max - min);
+        return Math.random() * (max - min) + min;
     }
 
     public static double generateRoundedDoubleInRange(int min, int max, int roundingOffset) {
