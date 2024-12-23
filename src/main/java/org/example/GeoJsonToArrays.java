@@ -14,11 +14,11 @@ import java.util.stream.StreamSupport;
 
 public class GeoJsonToArrays {
     public static void main(String[] args) {
-        String filePath = "/home/andrii/IdeaProjects/generator/src/main/resources/test.txt";
-
+        String geoFilePath = "/home/andrii/IdeaProjects/generator/src/main/resources/test.txt";
+        String filePath = "/home/andrii/IdeaProjects/thingsboard-demos/src/main/resources/asset_tracking/device_emulators.json";
         try {
 //            parseGeoJson(filePath);
-            updateAssetTrackingJson();
+            updateAssetTrackingJson(geoFilePath, filePath);
         } catch (IOException e) {
             System.err.println("Error reading the GeoJSON file: " + e.getMessage());
         }
@@ -63,13 +63,12 @@ public class GeoJsonToArrays {
         return result;
     }
 
-    private static void updateAssetTrackingJson() throws IOException {
-        String geoFilePath = "/home/andrii/IdeaProjects/generator/src/main/resources/test.txt";
-        String filePath = "/home/andrii/IdeaProjects/thingsboard-demos/src/main/resources/asset_tracking/device_emulators.json";
-        List<Map<String, List<Double>>> res = parseGeoJson(geoFilePath);
+    private static void updateAssetTrackingJson(String sourcePath, String destinationPath) throws IOException {
+
+        List<Map<String, List<Double>>> res = parseGeoJson(sourcePath);
 
         ObjectMapper objectMapper = new ObjectMapper();
-        ArrayNode rootNode = (ArrayNode) objectMapper.readTree(new File(filePath));
+        ArrayNode rootNode = (ArrayNode) objectMapper.readTree(new File(destinationPath));
 
         int count = 0;
         for (JsonNode jsonNode : rootNode) {
@@ -89,7 +88,6 @@ public class GeoJsonToArrays {
             count++;
         }
 
-
-        objectMapper.writerWithDefaultPrettyPrinter().writeValue(new File(filePath), rootNode);
+        objectMapper.writerWithDefaultPrettyPrinter().writeValue(new File(destinationPath), rootNode);
     }
 }
