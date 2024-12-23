@@ -2,7 +2,6 @@ package org.example;
 
 import org.example.util.Utility;
 
-import java.awt.Point;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,9 +13,9 @@ public class CircleCoordinates {
         double centerLon = 30.505421;
         double radius = 0.0004;
         int numPoints = 8;
-        int size = 16;
+        int size = 30;
 
-        for (int i = 0; i < 9; i++) {
+        for (int i = 0; i < 25; i++) {
             centerLon = centerLon + radius * 3;
 
             System.out.println("Counter:");
