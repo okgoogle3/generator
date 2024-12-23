@@ -24,8 +24,33 @@ public class GeoJsonToArrays {
         }
     }
 
+    private static void updateAssetTrackingJson(String sourcePath, String destinationPath) throws IOException {
+        List<Map<String, List<Double>>> res = parseGeoJson(sourcePath);
 
-    public static List<Map<String, List<Double>>> parseGeoJson(String filePath) throws IOException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        ArrayNode rootNode = (ArrayNode) objectMapper.readTree(new File(destinationPath));
+
+        int count = 0;
+        for (JsonNode jsonNode : rootNode) {
+            ArrayNode telemetryProfiles = (ArrayNode) jsonNode.get("telemetryProfiles");
+            JsonNode firstProfile = StreamSupport.stream(telemetryProfiles.spliterator(), false).filter(node -> "coordinates".equals(node.get("key").asText())).findFirst().get();
+            JsonNode telemetryNode = firstProfile.path("valueStrategy").path("telemetry");
+            if (telemetryNode.isObject()) {
+                ArrayNode latitudeArray = (ArrayNode) telemetryNode.get("latitude");
+                latitudeArray.removeAll();
+                res.get(count).get("latitude").forEach(latitudeArray::add);
+
+                ArrayNode longitudeArray = (ArrayNode) telemetryNode.get("longitude");
+                longitudeArray.removeAll();
+                res.get(count).get("longitude").forEach(longitudeArray::add);
+            }
+            count++;
+        }
+
+        objectMapper.writerWithDefaultPrettyPrinter().writeValue(new File(destinationPath), rootNode);
+    }
+
+    private static List<Map<String, List<Double>>> parseGeoJson(String filePath) throws IOException {
         List<JsonNode> geometryNode = getJsonNode(filePath);
         short count = 1;
         List<Map<String, List<Double>>> result = new ArrayList<>();
@@ -61,33 +86,5 @@ public class GeoJsonToArrays {
             result.add(jsonNode.at("/geometry"));
         }
         return result;
-    }
-
-    private static void updateAssetTrackingJson(String sourcePath, String destinationPath) throws IOException {
-
-        List<Map<String, List<Double>>> res = parseGeoJson(sourcePath);
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        ArrayNode rootNode = (ArrayNode) objectMapper.readTree(new File(destinationPath));
-
-        int count = 0;
-        for (JsonNode jsonNode : rootNode) {
-
-            ArrayNode telemetryProfiles = (ArrayNode) jsonNode.get("telemetryProfiles");
-            JsonNode firstProfile = StreamSupport.stream(telemetryProfiles.spliterator(), false).filter(node -> "coordinates".equals(node.get("key").asText())).findFirst().get();
-            JsonNode telemetryNode = firstProfile.path("valueStrategy").path("telemetry");
-            if (telemetryNode.isObject()) {
-                ArrayNode latitudeArray = (ArrayNode) telemetryNode.get("latitude");
-                latitudeArray.removeAll();
-                res.get(count).get("latitude").forEach(latitudeArray::add);
-
-                ArrayNode longitudeArray = (ArrayNode) telemetryNode.get("longitude");
-                longitudeArray.removeAll();
-                res.get(count).get("longitude").forEach(longitudeArray::add);
-            }
-            count++;
-        }
-
-        objectMapper.writerWithDefaultPrettyPrinter().writeValue(new File(destinationPath), rootNode);
     }
 }
