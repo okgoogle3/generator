@@ -13,7 +13,7 @@ import java.util.Map;
 
 public class GeoJsonToArrays {
     public static void main(String[] args) {
-        String filePath = "/home/thingsboard/Desktop/generator/src/main/resources/test.txt";
+        String filePath = "/home/thingsboard/Desktop/generator/src/main/resources/apr10.txt";
 
         try {
             parseGeoJson(filePath);
@@ -30,19 +30,24 @@ public class GeoJsonToArrays {
         for (JsonNode geometry : geometryNode) {
             List<Double> latitudes = new ArrayList<>();
             List<Double> longitudes = new ArrayList<>();
+
             if (geometry.get("type").asText().equals("Point")) {
                 longitudes.add(Utility.round(geometry.get("coordinates").get(0).asDouble(), 14)); // Longitude comes first in GeoJSON
                 latitudes.add(Utility.round(geometry.get("coordinates").get(1).asDouble(), 14)); // Latitude comes second
             }
-            for (JsonNode coordinate : geometry.get("coordinates")) {
-                if (coordinate.isArray() && coordinate.size() >= 2) {
-                    longitudes.add(Utility.round(coordinate.get(0).asDouble(), 14)); // Longitude comes first in GeoJSON
-                    latitudes.add(Utility.round(coordinate.get(1).asDouble(), 14)); // Latitude comes second
+
+            if (geometry.get("type").asText().equals("LineString")) {
+                for (JsonNode coordinate : geometry.get("coordinates")) {
+                    if (coordinate.isArray() && coordinate.size() >= 2) {
+                        longitudes.add(Utility.round(coordinate.get(0).asDouble(), 14)); // Longitude comes first in GeoJSON
+                        latitudes.add(Utility.round(coordinate.get(1).asDouble(), 14)); // Latitude comes second
+                    }
                 }
             }
+
             System.out.println("Trip " + count++ + ":");
-            System.out.println("Longitudes: \n" + longitudes);
-            System.out.println("Latitudes: \n" + latitudes);
+            System.out.println("\"latitude\" : " + latitudes);
+            System.out.println("\"longitude\" : " + longitudes);
             System.out.println();
             result.add(Map.of("longitude", longitudes,
                     "latitude", latitudes));
@@ -63,7 +68,8 @@ public class GeoJsonToArrays {
 
     private static void updateAssetTrackingJson() throws IOException {
         String filePath = "/home/thingsboard/Desktop/generator/src/main/resources/test.txt";
-        List<Map<String, List<Double>>> res = parseGeoJson(filePath);
+        String geofilePath = "/home/thingsboard/Desktop/generator/src/main/resources/apr10.txt";
+        List<Map<String, List<Double>>> res = parseGeoJson(geofilePath);
 
         ObjectMapper objectMapper = new ObjectMapper();
         ArrayNode rootNode = (ArrayNode) objectMapper.readTree(new File(filePath));
