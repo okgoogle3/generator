@@ -14,8 +14,8 @@ import java.util.stream.StreamSupport;
 
 public class GeoJsonToArrays {
     public static void main(String[] args) {
-        String geoFilePath = "/home/andrii/IdeaProjects/generator/src/main/resources/test.txt";
-        String filePath = "/home/andrii/IdeaProjects/thingsboard-demos/src/main/resources/asset_tracking/device_emulators.json";
+        String geoFilePath = "/home/thingsboard/Desktop/generator/src/main/resources/apr10.txt";
+        String filePath = "/home/thingsboard/Desktop/thingsboard-demos/src/main/resources/asset_tracking/device_emulators.json";
         try {
 //            parseGeoJson(filePath);
             updateAssetTrackingJson(geoFilePath, filePath);
@@ -35,7 +35,7 @@ public class GeoJsonToArrays {
             ArrayNode telemetryProfiles = (ArrayNode) jsonNode.get("telemetryProfiles");
             JsonNode firstProfile = StreamSupport.stream(telemetryProfiles.spliterator(), false).filter(node -> "coordinates".equals(node.get("key").asText())).findFirst().get();
             JsonNode telemetryNode = firstProfile.path("valueStrategy").path("telemetry");
-            if (telemetryNode.isObject()) {
+            if (telemetryNode.isObject() && res.size() > count) {
                 ArrayNode latitudeArray = (ArrayNode) telemetryNode.get("latitude");
                 latitudeArray.removeAll();
                 res.get(count).get("latitude").forEach(latitudeArray::add);
@@ -61,18 +61,25 @@ public class GeoJsonToArrays {
                 longitudes.add(Utility.round(geometry.get("coordinates").get(0).asDouble(), 10)); // Longitude comes first in GeoJSON
                 latitudes.add(Utility.round(geometry.get("coordinates").get(1).asDouble(), 10)); // Latitude comes second
             }
-            for (JsonNode coordinate : geometry.get("coordinates")) {
-                if (coordinate.isArray() && coordinate.size() >= 2) {
-                    longitudes.add(Utility.round(coordinate.get(0).asDouble(), 10)); // Longitude comes first in GeoJSON
-                    latitudes.add(Utility.round(coordinate.get(1).asDouble(), 10)); // Latitude comes second
+
+            if (geometry.get("type").asText().equals("LineString")) {
+                for (JsonNode coordinate : geometry.get("coordinates")) {
+                    if (coordinate.isArray() && coordinate.size() >= 2) {
+                        longitudes.add(Utility.round(coordinate.get(0).asDouble(), 10)); // Longitude comes first in GeoJSON
+                        latitudes.add(Utility.round(coordinate.get(1).asDouble(), 10)); // Latitude comes second
+                    }
                 }
             }
+
             System.out.println("Trip " + count++ + ":");
             System.out.println("Longitudes: \n" + longitudes);
             System.out.println("Latitudes: \n" + latitudes);
             System.out.println();
-            result.add(Map.of("longitude", longitudes,
-                    "latitude", latitudes));
+
+            result.add(Map.of(
+                    "longitude", longitudes,
+                    "latitude", latitudes
+            ));
         }
         return result;
     }
