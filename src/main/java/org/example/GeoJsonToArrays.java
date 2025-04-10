@@ -10,44 +10,66 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.StreamSupport;
 
 public class GeoJsonToArrays {
     public static void main(String[] args) {
-        String filePath = "/home/thingsboard/Desktop/generator/src/main/resources/apr10.txt";
-
+        String geoFilePath = "/home/andrii/IdeaProjects/generator/src/main/resources/test.txt";
+        String filePath = "/home/andrii/IdeaProjects/thingsboard-demos/src/main/resources/asset_tracking/device_emulators.json";
         try {
-            parseGeoJson(filePath);
+//            parseGeoJson(filePath);
+            updateAssetTrackingJson(geoFilePath, filePath);
         } catch (IOException e) {
             System.err.println("Error reading the GeoJSON file: " + e.getMessage());
         }
     }
 
+    private static void updateAssetTrackingJson(String sourcePath, String destinationPath) throws IOException {
+        List<Map<String, List<Double>>> res = parseGeoJson(sourcePath);
 
-    public static List<Map<String, List<Double>>> parseGeoJson(String filePath) throws IOException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        ArrayNode rootNode = (ArrayNode) objectMapper.readTree(new File(destinationPath));
+
+        int count = 0;
+        for (JsonNode jsonNode : rootNode) {
+            ArrayNode telemetryProfiles = (ArrayNode) jsonNode.get("telemetryProfiles");
+            JsonNode firstProfile = StreamSupport.stream(telemetryProfiles.spliterator(), false).filter(node -> "coordinates".equals(node.get("key").asText())).findFirst().get();
+            JsonNode telemetryNode = firstProfile.path("valueStrategy").path("telemetry");
+            if (telemetryNode.isObject()) {
+                ArrayNode latitudeArray = (ArrayNode) telemetryNode.get("latitude");
+                latitudeArray.removeAll();
+                res.get(count).get("latitude").forEach(latitudeArray::add);
+
+                ArrayNode longitudeArray = (ArrayNode) telemetryNode.get("longitude");
+                longitudeArray.removeAll();
+                res.get(count).get("longitude").forEach(longitudeArray::add);
+            }
+            count++;
+        }
+
+        objectMapper.writerWithDefaultPrettyPrinter().writeValue(new File(destinationPath), rootNode);
+    }
+
+    private static List<Map<String, List<Double>>> parseGeoJson(String filePath) throws IOException {
         List<JsonNode> geometryNode = getJsonNode(filePath);
         short count = 1;
         List<Map<String, List<Double>>> result = new ArrayList<>();
         for (JsonNode geometry : geometryNode) {
             List<Double> latitudes = new ArrayList<>();
             List<Double> longitudes = new ArrayList<>();
-
             if (geometry.get("type").asText().equals("Point")) {
-                longitudes.add(Utility.round(geometry.get("coordinates").get(0).asDouble(), 14)); // Longitude comes first in GeoJSON
-                latitudes.add(Utility.round(geometry.get("coordinates").get(1).asDouble(), 14)); // Latitude comes second
+                longitudes.add(Utility.round(geometry.get("coordinates").get(0).asDouble(), 10)); // Longitude comes first in GeoJSON
+                latitudes.add(Utility.round(geometry.get("coordinates").get(1).asDouble(), 10)); // Latitude comes second
             }
-
-            if (geometry.get("type").asText().equals("LineString")) {
-                for (JsonNode coordinate : geometry.get("coordinates")) {
-                    if (coordinate.isArray() && coordinate.size() >= 2) {
-                        longitudes.add(Utility.round(coordinate.get(0).asDouble(), 14)); // Longitude comes first in GeoJSON
-                        latitudes.add(Utility.round(coordinate.get(1).asDouble(), 14)); // Latitude comes second
-                    }
+            for (JsonNode coordinate : geometry.get("coordinates")) {
+                if (coordinate.isArray() && coordinate.size() >= 2) {
+                    longitudes.add(Utility.round(coordinate.get(0).asDouble(), 10)); // Longitude comes first in GeoJSON
+                    latitudes.add(Utility.round(coordinate.get(1).asDouble(), 10)); // Latitude comes second
                 }
             }
-
             System.out.println("Trip " + count++ + ":");
-            System.out.println("\"latitude\" : " + latitudes);
-            System.out.println("\"longitude\" : " + longitudes);
+            System.out.println("Longitudes: \n" + longitudes);
+            System.out.println("Latitudes: \n" + latitudes);
             System.out.println();
             result.add(Map.of("longitude", longitudes,
                     "latitude", latitudes));
@@ -64,44 +86,5 @@ public class GeoJsonToArrays {
             result.add(jsonNode.at("/geometry"));
         }
         return result;
-    }
-
-    private static void updateAssetTrackingJson() throws IOException {
-        String filePath = "/home/thingsboard/Desktop/generator/src/main/resources/test.txt";
-        String geofilePath = "/home/thingsboard/Desktop/generator/src/main/resources/apr10.txt";
-        List<Map<String, List<Double>>> res = parseGeoJson(geofilePath);
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        ArrayNode rootNode = (ArrayNode) objectMapper.readTree(new File(filePath));
-        int count = 0;
-        for (JsonNode jsonNode : rootNode) {
-//            ObjectNode objectNode = (ObjectNode) jsonNode;
-//            objectNode.get("telemetryProfiles").get(0).get("valueStrategy").get("telemetry").get("latitude")
-//            res.get(count).get("longitude");
-//            res.get(count).get("latitude");
-//            count++;
-            ArrayNode telemetryProfiles = (ArrayNode) jsonNode.get("telemetryProfiles");
-                JsonNode firstProfile = telemetryProfiles.get(0);
-                JsonNode telemetryNode = firstProfile.path("valueStrategy").path("telemetry");
-                if (telemetryNode.isObject()) {
-                    ArrayNode latitudeArray = (ArrayNode) telemetryNode.get("latitude");
-                    // Update "latitude" values
-                    if (latitudeArray != null && latitudeArray.isArray()) {
-                        for (int i = 0; i < latitudeArray.size(); i++) {
-                            double updatedValue = latitudeArray.get(i).asDouble() + 0.0001; // Example update
-                            latitudeArray.set(i, updatedValue);
-                        }
-                    }
-                }
-
-
-        }
-
-
-        objectMapper.writerWithDefaultPrettyPrinter().writeValue(new File(filePath), rootNode);
-    }
-
-    private static void updateJsonNode() throws IOException {
-
     }
 }
