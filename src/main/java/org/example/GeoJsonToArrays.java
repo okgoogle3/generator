@@ -44,7 +44,7 @@ public class GeoJsonToArrays {
             System.out.println(count);
             ArrayNode telemetryProfiles = (ArrayNode) fullGeneratorInfoJson.get("telemetryProfiles");
             updateCoordinates(telemetryProfiles, source, count);
-//            updateRssi(telemetryProfiles);
+            updateRssi(telemetryProfiles);
             updateTemperature(telemetryProfiles);
             updateBatteryLevel(telemetryProfiles);
             count++;
@@ -70,10 +70,10 @@ public class GeoJsonToArrays {
         JsonNode otherTelemetryNode = getTelemetryProfileByKey(telemetryProfiles, "other").path("valueStrategy").path("telemetry");
         ArrayNode rssiArray = (ArrayNode) otherTelemetryNode.get("rssi");
 
-        ArrayNode coordinatesArray = (ArrayNode) getTelemetryProfileByKey(telemetryProfiles, "coordinates").path("valueStrategy").path("telemetry").path("latitude");
-        int rssiArraySize = Math.min(coordinatesArray.size(), 100);
+//        ArrayNode coordinatesArray = (ArrayNode) getTelemetryProfileByKey(telemetryProfiles, "coordinates").path("valueStrategy").path("telemetry").path("latitude");
+//        int rssiArraySize = Math.min(coordinatesArray.size(), 100);
 
-        var rssiNewValues = Utility.generateListOfRandomDoublesWithExtremeValues(rssiArraySize, -100, -60, 0);
+        var rssiNewValues = Utility.generateListOfRandomDoublesWithExtremeValues(100, -100, -60, 0);
         System.out.println("rssi: " + rssiNewValues);
 
         rssiArray.removeAll();
@@ -84,10 +84,7 @@ public class GeoJsonToArrays {
         JsonNode otherTelemetryNode = getTelemetryProfileByKey(telemetryProfiles, "other").path("valueStrategy").path("telemetry");
         ArrayNode temperatureArray = (ArrayNode) otherTelemetryNode.get("temperature");
 
-        ArrayNode coordinatesArray = (ArrayNode) getTelemetryProfileByKey(telemetryProfiles, "coordinates").path("valueStrategy").path("telemetry").path("latitude");
-        int arraySize = coordinatesArray.size() > 80 ? 100 : 20;
-
-        var temperatureNewValues = Utility.generateListOfRandomDoublesWithExtremeValues(arraySize, 30, 40, 0);
+        var temperatureNewValues = Utility.generateListOfRandomDoublesWithExtremeValues(100, 30, 40, 0);
         System.out.println("temperature: " + temperatureNewValues);
 
         temperatureArray.removeAll();
@@ -98,10 +95,7 @@ public class GeoJsonToArrays {
         JsonNode otherTelemetryNode = getTelemetryProfileByKey(telemetryProfiles, "other").path("valueStrategy").path("telemetry");
         ArrayNode batteryLevelArray = (ArrayNode) otherTelemetryNode.get("batteryLevel");
 
-        ArrayNode coordinatesArray = (ArrayNode) getTelemetryProfileByKey(telemetryProfiles, "coordinates").path("valueStrategy").path("telemetry").path("latitude");
-        int arraySize = coordinatesArray.size() > 60 ? 100 : 20;
-
-        var batteryLevelNewValues = Utility.generateListOfRandomDoublesWithExtremeValues(arraySize, 15, 90, 2);
+        var batteryLevelNewValues = Utility.generateListOfRandomDoublesWithExtremeValues(100, 15, 90, 2);
         System.out.println("batteryLevel: " + batteryLevelNewValues);
 
         batteryLevelArray.removeAll();
