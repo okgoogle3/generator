@@ -8706,7 +8706,8 @@
           ]
         ],
         "type": "LineString"
-      }
+      },
+      "id": 10
     },
     {
       "type": "Feature",
@@ -11970,6 +11971,28 @@
           ]
         ],
         "type": "LineString"
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {},
+      "geometry": {
+        "coordinates": [
+          37.56788578715148,
+          48.74838179735289
+        ],
+        "type": "Point"
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {},
+      "geometry": {
+        "coordinates": [
+          37.5738997400768,
+          48.75980584490182
+        ],
+        "type": "Point"
       }
     }
   ]
